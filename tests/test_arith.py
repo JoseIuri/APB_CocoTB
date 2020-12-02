@@ -35,7 +35,7 @@ class APBTransaction(Randomized):
         self.slverr = BinaryValue(n_bits=1, value=0, bigEndian=False)
 
         self.add_rand("addr",list(range(ADDR_MAX*4)))
-        self.add_rand("rw"    ,list([0,1]))
+        self.add_rand("rw"  ,list([0,1]))
 
     def post_randomize(self):
         self.data = random.randint(0,0xFFFFFFFF)
@@ -45,7 +45,7 @@ class APBTransaction(Randomized):
         self.rw   = BinaryValue(value=self.rw, n_bits=1, bigEndian=False)
 
     def print_tr(self):
-        print ("Data: ", type(self.data), " Addr: ", type(self.addr), " RW: ", type(self.rw), " SLVERR: ", type(self.slverr))
+        print ("Data: ", self.data, " Addr: ", self.addr, " RW: ", self.rw, " SLVERR: ", self.slverr)
 
     def __eq__(self,other):
         if (isinstance(other, APBTransaction)):
@@ -129,6 +129,7 @@ class APBDriver(BusDriver):
                     tr.data = self.bus.prdata
                     tr.slverr = self.bus.pslverr
                     break
+                yield RisingEdge(self.clock)
             
             yield RisingEdge(self.clock)
 
@@ -227,7 +228,12 @@ class ArithTB(object):
             if(self.exp_out[-1] == self.rec_out[-1]):
                 print("[COMPARATOR MATCH]")
             else:
-                print("[COMPARATOR MISSMATCH] Expected: ", self.exp_out[-1].print_tr(), " Received: ", self.rec_out[-1].print_tr())
+                print("[COMPARATOR MISSMATCH]")
+                print("Expected: ")
+                self.exp_out[-1].print_tr()
+                print("Received: ")
+                self.rec_out[-1].print_tr()
+                
                 self.missmatch += 1
 
             self.exp_out.pop()
